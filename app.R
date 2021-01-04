@@ -32,10 +32,10 @@ ui <- fluidPage(
     titlePanel("Shiny Dashboard of Covid Cases in Canada"),
     mainPanel(
       p("This shiny app depicts total cases of covid in Canada. Data is requested from the API: (covid19api.com).
-      The data and corresponding data visualization will update dynamically. 
+      The data and corresponding visualizations will update dynamically. 
       On this dashboard, you can filter data by province, month, and year. 
       There are graphs that visualize covid cases in Canada throughout 2020 and 2021. Graphs show covid cases by month and
-      can be filtered by province.")),
+      can be filtered by province. Data can be downloaded in a .csv format.")),
     
     
     
