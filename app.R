@@ -26,54 +26,66 @@ df <- df %>%
     filter(Province != "Grand Princess") %>%
     select(-CountryCode, -City, -CityCode, -Status, -month)
 
+plot_df <- df
+plot_df$Province_plot <- plot_df$Province
 #-----------------------------------
 
 ui <- fluidPage(
     titlePanel("Shiny Dashboard of Covid Cases in Canada"),
-    mainPanel(
+    
       p("This shiny app depicts total cases of covid in Canada. Data is requested from the API: (covid19api.com).
       The data and corresponding visualizations will update dynamically. 
       On this dashboard, you can filter data by province, month, and year. 
       There are graphs that visualize covid cases in Canada throughout 2020 and 2021. Graphs show covid cases by month and
-      can be filtered by province. Data can be downloaded in a .csv format.")),
+      can be filtered by province. Data can be downloaded in a .csv format."),
+
     
-    
-    
-    # Create a new Row in the UI for selectInputs
-    fluidRow(
-        column(5,
-               selectInput("Province",
-                           "Province:",
-                           c("All",
-                             unique(as.character(df$Province))))
-        ),
-        column(5,
-               selectInput("month_abr",
-                           "Month:",
-                           c("All",
-                             unique(as.character(df$month_abr))))
-        ),
-        column(5,
-               selectInput("year",
-                           "Year:",
-                           c("All",
-                             unique(as.character(df$year))))
-        )
-               
+    tabsetPanel(type = "tabs",
+                tabPanel("Table",
+                         fluidRow(
+                           column(5,
+                                  selectInput("Province",
+                                              "Province:",
+                                              c("All",
+                                                unique(as.character(df$Province))))
+                           ),
+                           column(5,
+                                  selectInput("month_abr",
+                                              "Month:",
+                                              c("All",
+                                                unique(as.character(df$month_abr))))
+                           ),
+                           column(5,
+                                  selectInput("year",
+                                              "Year:",
+                                              c("All",
+                                                unique(as.character(df$year))))
+                           )
+                         
+                         
+                         ),
+                         
+                         DT::dataTableOutput("table"),
+                         downloadButton('downloadData', 'Download data')),
+                
+                tabPanel("Plot",
+                         fluidRow(
+                           column(5,
+                                  selectInput("Province_plot",
+                                              "Province: ",
+                                              c("All",
+                                                unique(as.character(plot_df$Province_plot))))
+                           )),
+                         plotOutput("plot1", hover = "plot_hover1"),
+                         verbatimTextOutput("info1"),
+                         plotOutput("plot2", hover = "plot_hover2"),
+                         verbatimTextOutput("info2"))))
+
   
-    ),
-    # Create a new row for the table.
-    DT::dataTableOutput("table"),
-    downloadButton('downloadData', 'Download data'),
-    
-    plotOutput("plot1", hover = "plot_hover1"),
-    verbatimTextOutput("info1"),
-    plotOutput("plot2", hover = "plot_hover2"),
-    verbatimTextOutput("info2")
     
 
 
-)
+
 
 
 server <- function(input, output) {   # Filter data based on selections
@@ -99,18 +111,18 @@ server <- function(input, output) {   # Filter data based on selections
         })
     
     output$plot1 <- renderPlot({
-      
-      if (input$Province != "All") {
-        df <- df[df$Province == input$Province,]
+      plot_df1 <- plot_df
+      if (input$Province_plot != "All") {
+        plot_df1 <- plot_df[plot_df$Province_plot == input$Province_plot,]
       }
       
       
-      df %>%
+      plot_df1 %>%
         filter(year == 2020) %>% 
-        group_by(Province, month_abr) %>%
+        group_by(Province_plot, month_abr) %>%
         filter(Cases == max(Cases)) %>%
         ggplot(aes(x = month_abr, y = Cases)) + 
-        geom_line(aes(group = Province, color = Province)) + 
+        geom_line(aes(group = Province_plot, color = Province_plot)) + 
         xlab("Month") + ylab("Total Cases") + 
         ggtitle("Total Cases by Province in 2020") })
  
@@ -125,19 +137,19 @@ server <- function(input, output) {   # Filter data based on selections
     })   
 
     output$plot2 <- renderPlot({
-      
-      if (input$Province != "All") {
-        df <- df[df$Province == input$Province,]
+      plot_df1 <- plot_df
+      if (input$Province_plot != "All") {
+        plot_df1 <- plot_df[plot_df$Province_plot == input$Province_plot,]
       }
       
       
-      df %>%
+      plot_df1 %>%
         filter(year == 2021) %>% 
-        group_by(Province, month_abr) %>%
+        group_by(Province_plot, month_abr) %>%
         filter(Cases == max(Cases)) %>%
         ggplot(aes(x = month_abr, y = Cases)) + 
-        geom_point(aes(group = Province, color = Province)) + 
-        geom_line(aes(group = Province)) +
+        geom_point(aes(group = Province_plot, color = Province_plot)) + 
+        geom_line(aes(group = Province_plot)) +
         xlab("Month") + ylab("Total Cases") + 
         ggtitle("Total Cases by Province in 2021")  })
     
