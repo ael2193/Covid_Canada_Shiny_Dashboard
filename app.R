@@ -27,7 +27,7 @@ df <- df %>%
     select(-CountryCode, -City, -CityCode, -Status, -month)
 
 plot_df <- df
-plot_df$Province_plot <- plot_df$Province
+
 #-----------------------------------
 
 ui <- fluidPage(
@@ -74,7 +74,7 @@ ui <- fluidPage(
                                   selectInput("Province_plot",
                                               "Province: ",
                                               c("All",
-                                                unique(as.character(plot_df$Province_plot))))
+                                                unique(as.character(plot_df$Province))))
                            )),
                          plotOutput("plot1", hover = "plot_hover1"),
                          verbatimTextOutput("info1"),
@@ -111,18 +111,18 @@ server <- function(input, output) {   # Filter data based on selections
         })
     
     output$plot1 <- renderPlot({
-      plot_df1 <- plot_df
+      
       if (input$Province_plot != "All") {
-        plot_df1 <- plot_df[plot_df$Province_plot == input$Province_plot,]
+        plot_df <- plot_df[plot_df$Province == input$Province_plot,]
       }
       
       
-      plot_df1 %>%
+      plot_df %>%
         filter(year == 2020) %>% 
-        group_by(Province_plot, month_abr) %>%
+        group_by(Province, month_abr) %>%
         filter(Cases == max(Cases)) %>%
         ggplot(aes(x = month_abr, y = Cases)) + 
-        geom_line(aes(group = Province_plot, color = Province_plot)) + 
+        geom_line(aes(group = Province, color = Province)) + 
         xlab("Month") + ylab("Total Cases") + 
         ggtitle("Total Cases by Province in 2020") })
  
@@ -137,19 +137,19 @@ server <- function(input, output) {   # Filter data based on selections
     })   
 
     output$plot2 <- renderPlot({
-      plot_df1 <- plot_df
+      
       if (input$Province_plot != "All") {
-        plot_df1 <- plot_df[plot_df$Province_plot == input$Province_plot,]
+        plot_df <- plot_df[plot_df$Province == input$Province_plot,]
       }
       
       
-      plot_df1 %>%
+      plot_df %>%
         filter(year == 2021) %>% 
-        group_by(Province_plot, month_abr) %>%
+        group_by(Province, month_abr) %>%
         filter(Cases == max(Cases)) %>%
         ggplot(aes(x = month_abr, y = Cases)) + 
-        geom_point(aes(group = Province_plot, color = Province_plot)) + 
-        geom_line(aes(group = Province_plot)) +
+        geom_point(aes(group = Province, color = Province)) + 
+        geom_line(aes(group = Province)) +
         xlab("Month") + ylab("Total Cases") + 
         ggtitle("Total Cases by Province in 2021")  })
     
